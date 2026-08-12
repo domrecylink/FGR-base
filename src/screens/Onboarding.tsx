@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import Card from '../components/ds/Card'
 import Button from '../components/ds/Button'
 import Logo from '../components/Logo'
@@ -8,8 +8,8 @@ const steps = ['1 · Qué es el FGR', '2 · Qué logras', '3 · Qué necesitas']
 
 export default function Onboarding() {
   const [step, setStep] = useState(0)
-  const navigate = useNavigate()
-  const finish = () => navigate('/sucursales')
+  const router = useRouter()
+  const finish = () => router.push('/sucursales')
 
   return (
     <div

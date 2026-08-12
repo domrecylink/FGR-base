@@ -1,9 +1,9 @@
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import Card from './ds/Card'
 import Button from './ds/Button'
 
 export default function NoProjects() {
-  const navigate = useNavigate()
+  const router = useRouter()
   return (
     <Card>
       <div style={{ padding: '40px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
@@ -11,7 +11,7 @@ export default function NoProjects() {
           Primero crea una sucursal
         </strong>
         <span style={{ color: 'var(--rl-fg-muted)' }}>Necesitas al menos un proyecto para trabajar aquí.</span>
-        <Button variant="primary" size="sm" onClick={() => navigate('/sucursales')}>
+        <Button variant="primary" size="sm" onClick={() => router.push('/sucursales')}>
           Ir a Sucursales
         </Button>
       </div>

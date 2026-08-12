@@ -1,6 +1,7 @@
 import type { EventRow, Project, RecordRow, WasteSplit, WasteType } from '../types'
 
-const GAS_URL = import.meta.env.VITE_GAS_URL as string | undefined
+// NEXT_PUBLIC_* se hornea en el bundle al compilar: cambiarla exige rebuild/redeploy.
+const GAS_URL = process.env.NEXT_PUBLIC_GAS_URL
 
 export type Entity = 'project' | 'record' | 'event' | 'wasteType'
 export type WriteAction = 'create' | 'update' | 'delete'
@@ -15,7 +16,7 @@ export interface AllData {
 function ensureUrl(): string {
   if (!GAS_URL) {
     throw new Error(
-      'Falta VITE_GAS_URL. Copia .env.example a .env y pega la URL del Web App de Apps Script.',
+      'Falta NEXT_PUBLIC_GAS_URL. Copia .env.example a .env.local y pega la URL del Web App de Apps Script.',
     )
   }
   return GAS_URL

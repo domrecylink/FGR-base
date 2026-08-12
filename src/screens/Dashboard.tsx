@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { useData } from '../store/DataContext'
 import { buildSeries } from '../domain/fgr'
 import { fgrColorVar, fgrTone } from '../domain/summary'
@@ -16,7 +16,7 @@ import { IconAlert } from '../components/icons'
 
 export default function Dashboard() {
   const { projects, records, events, wasteTypes, selectedProjectId } = useData()
-  const navigate = useNavigate()
+  const router = useRouter()
   const [mode, setMode] = useState<FgrMode>('cumulative')
   /**
    * Guardamos los tipos EXCLUIDOS, no los incluidos: así un tipo que aparezca después
@@ -122,7 +122,7 @@ export default function Dashboard() {
             <span style={{ font: '400 14px/1.5 var(--rl-font-body)', color: 'var(--rl-fg-muted)', maxWidth: 400 }}>
               Carga al menos un mes de avance y residuos para ver la evolución del FGR de esta sucursal.
             </span>
-            <Button variant="primary" size="sm" onClick={() => navigate('/ingreso')}>Ir al ingreso mensual</Button>
+            <Button variant="primary" size="sm" onClick={() => router.push('/ingreso')}>Ir al ingreso mensual</Button>
           </div>
         </Card>
       ) : (
@@ -141,7 +141,7 @@ export default function Dashboard() {
                   Sin avance no hay m² para dividir, así que esos meses no tienen FGR.
                 </span>
               </div>
-              <Button variant="secondary" size="sm" onClick={() => navigate('/ingreso')}>Completar avance</Button>
+              <Button variant="secondary" size="sm" onClick={() => router.push('/ingreso')}>Completar avance</Button>
             </div>
           )}
 
@@ -159,7 +159,7 @@ export default function Dashboard() {
                   FGR acumulado {formatFgr(last?.global ?? null)} m³/m² frente a una meta de {formatFgr(target)}. Revisa los meses con más generación de residuo.
                 </span>
               </div>
-              <Button variant="secondary" size="sm" onClick={() => navigate('/ingreso')}>Revisar los meses</Button>
+              <Button variant="secondary" size="sm" onClick={() => router.push('/ingreso')}>Revisar los meses</Button>
             </div>
           )}
 

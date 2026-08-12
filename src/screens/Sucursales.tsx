@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { useData } from '../store/DataContext'
 import { projectSummary, fgrColorVar } from '../domain/summary'
 import { formatFgr, formatNumber, parseDecimal } from '../utils/format'
@@ -17,14 +17,14 @@ const GRID = '2.2fr 1fr 1.1fr 1.1fr 1fr 1.1fr 1.2fr'
 export default function Sucursales() {
   const { projects, records, loading, setSelectedProjectId, createProject, deleteProject } =
     useData()
-  const navigate = useNavigate()
+  const router = useRouter()
   const toast = useToast()
   const [crear, setCrear] = useState(false)
   const [del, setDel] = useState<Project | null>(null)
 
   function open(id: string, to: string) {
     setSelectedProjectId(id)
-    navigate(to)
+    router.push(to)
   }
 
   return (
@@ -111,7 +111,7 @@ export default function Sucursales() {
             await createProject(data)
             setCrear(false)
             toast('Sucursal creada')
-            navigate('/ingreso')
+            router.push('/ingreso')
           }}
         />
       )}

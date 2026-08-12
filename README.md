@@ -4,7 +4,7 @@ Aplicación web para que los clientes de Recylink registren el **avance de obra*
 **generación de residuos** de sus proyectos, y visualicen el **FGR** (Factor de Generación
 de Residuos = m³/m²) en una gráfica de líneas.
 
-- **Frontend:** React + Vite + TypeScript + Recharts. Se aloja en **GitHub Pages**.
+- **Frontend:** Next.js (App Router) + React + TypeScript + Recharts. Se aloja en **Vercel**.
 - **Backend:** **Google Apps Script** (Web App ligado a la hoja). No hay Node/Express ni cuenta de servicio.
 - **Base de datos:** una **Google Sheet** con 3 pestañas.
 - **Toda la lógica de cálculo** (m² acumulados, deltas mensuales, FGR mensual/acumulado) vive en el frontend (TypeScript, con pruebas). Apps Script solo lee/escribe celdas.
@@ -28,7 +28,7 @@ de Residuos = m³/m²) en una gráfica de líneas.
    - **Descripción:** `FGR API`
    - **Ejecutar como:** _Yo_
    - **Quién tiene acceso:** _Cualquier persona_
-6. Copia la **URL del Web App** (termina en `/exec`). La usarás como `VITE_GAS_URL`.
+6. Copia la **URL del Web App** (termina en `/exec`). La usarás como `NEXT_PUBLIC_GAS_URL`.
 
 > Cada vez que edites `Code.gs` debes **crear una implementación nueva** (o “Administrar
 > implementaciones → editar → Nueva versión”) para que los cambios tomen efecto en la URL.
@@ -69,35 +69,35 @@ de Residuos = m³/m²) en una gráfica de líneas.
 Requiere Node 20+.
 
 ```bash
-cp .env.example .env
-# edita .env y pega tu URL en VITE_GAS_URL
+cp .env.example .env.local
+# edita .env.local y pega tu URL en NEXT_PUBLIC_GAS_URL
 npm install
 npm run dev
 ```
 
-Abre la URL que imprime Vite. Otros comandos:
+Abre <http://localhost:3000>. Otros comandos:
 
 ```bash
 npm test        # pruebas de la lógica de dominio (Vitest)
 npm run build   # build de producción
-npm run preview # sirve el build local
+npm start       # sirve el build local
+npm run typecheck
 ```
 
 ---
 
-## 3. Publicar en GitHub Pages
+## 3. Publicar en Vercel
 
-El workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) compila y publica en
-cada push a `main`.
+El repo vive en GitHub; el sitio lo sirve **Vercel**, que despliega en cada push a `main`.
 
-1. Crea el repo en GitHub y súbelo (por ejemplo `FGR`).
-2. **Settings → Secrets and variables → Actions → New repository secret:**
-   - Nombre: `VITE_GAS_URL` · Valor: la URL `/exec` del Web App.
-3. **Settings → Pages → Build and deployment → Source: _GitHub Actions_.**
-4. Haz push a `main`. El workflow arma el sitio en `https://<usuario>.github.io/<repo>/`.
+1. Importa el repo en Vercel (framework detectado: Next.js).
+2. **Settings → Environment Variables:** `NEXT_PUBLIC_GAS_URL` = la URL `/exec` del Web App,
+   marcada para Production, Preview y Development.
+3. **Deployments → ⋯ → Redeploy** después de cambiar la variable.
 
-> El `base` de Vite se calcula solo como `/<nombre-del-repo>/` en el workflow. En local no
-> importa. Si sirves el build fuera de Actions, define `VITE_BASE` a mano.
+> `NEXT_PUBLIC_*` se **hornea en el bundle al compilar**: cambiarla en Vercel no tiene efecto
+> hasta que haya un build nuevo. Y como viaja al JS público, la URL del Web App es visible para
+> cualquiera que abra el sitio.
 
 ---
 
@@ -159,6 +159,10 @@ seleccionada**. Columnas que lee (por nombre de encabezado, no por posición):
 ## Estructura
 
 ```
+app/layout.tsx             Layout raíz + providers (Toast, Data)
+app/(shell)/layout.tsx     Barra lateral + banner de error
+app/(shell)/<ruta>/page.tsx  Rutas: sucursales, dashboard, ingreso, masiva
+app/onboarding/page.tsx    Wizard, fuera del shell
 apps-script/Code.gs        Backend (doGet/doPost, LockService, cascada, migrate)
 src/domain/fgr.ts          Cálculo de FGR + validación (+ fgr.test.ts)
 src/domain/summary.ts      Resumen por proyecto (avance, estado, tono)
@@ -168,7 +172,8 @@ src/utils/xlsx.ts          Lector mínimo de .xlsx (fflate)
 src/api/gas.ts             Cliente HTTP del Web App (POST text/plain)
 src/store/DataContext.tsx  Estado global + CRUD optimista (4 entidades)
 src/components/ds/         Sistema de diseño: Button, Card, Input, Modal, StatusChip, Toast
-src/pages/                 Onboarding, Sucursales, Dashboard, IngresoMensual, CargaMasiva
+src/screens/               Onboarding, Sucursales, Dashboard, IngresoMensual, CargaMasiva
+                           (no se llama src/pages: Next lo tomaría por el Pages Router)
 ```
 
 > **Logo**: coloca `logo-color-horizontal.png` del proyecto de diseño en `public/logo-recylink.png`.

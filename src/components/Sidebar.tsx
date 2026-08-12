@@ -1,4 +1,7 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+'use client'
+
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import Logo from './Logo'
 import { IconChart, IconLayers, IconPen, IconUpload } from './icons'
@@ -11,7 +14,8 @@ const items: { to: string; label: string; icon: ReactNode }[] = [
 ]
 
 export default function Sidebar() {
-  const navigate = useNavigate()
+  const router = useRouter()
+  const pathname = usePathname()
   return (
     <aside
       style={{
@@ -32,27 +36,30 @@ export default function Sidebar() {
         <Logo height={26} />
       </div>
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {items.map((it) => (
-          <NavLink
-            key={it.to}
-            to={it.to}
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '10px 12px',
-              borderRadius: 'var(--rl-radius-md)',
-              font: '600 14.5px/1.1 var(--rl-font-body)',
-              textDecoration: 'none',
-              background: isActive ? 'var(--rl-primary-50)' : 'transparent',
-              color: isActive ? 'var(--rl-primary-900)' : 'var(--rl-fg-muted)',
-              boxShadow: isActive ? 'inset 0 0 0 1px var(--rl-primary-100)' : 'none',
-            })}
-          >
-            {it.icon}
-            {it.label}
-          </NavLink>
-        ))}
+        {items.map((it) => {
+          const isActive = pathname === it.to
+          return (
+            <Link
+              key={it.to}
+              href={it.to}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 12px',
+                borderRadius: 'var(--rl-radius-md)',
+                font: '600 14.5px/1.1 var(--rl-font-body)',
+                textDecoration: 'none',
+                background: isActive ? 'var(--rl-primary-50)' : 'transparent',
+                color: isActive ? 'var(--rl-primary-900)' : 'var(--rl-fg-muted)',
+                boxShadow: isActive ? 'inset 0 0 0 1px var(--rl-primary-100)' : 'none',
+              }}
+            >
+              {it.icon}
+              {it.label}
+            </Link>
+          )
+        })}
       </nav>
       <div
         style={{
@@ -73,7 +80,7 @@ export default function Sidebar() {
         </span>
         <button
           type="button"
-          onClick={() => navigate('/onboarding')}
+          onClick={() => router.push('/onboarding')}
           style={{
             all: 'unset',
             cursor: 'pointer',

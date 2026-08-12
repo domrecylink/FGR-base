@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { useData } from '../store/DataContext'
 import type { ProgressMode, Project, WasteSplit, WasteType } from '../types'
 import { analyzeTrazabilidad, type TrazaAnalysis } from '../domain/trazabilidad'
@@ -71,7 +71,7 @@ type Decision = 'replace' | 'skip'
 
 function Trazabilidad({ project }: { project: Project }) {
   const { records, wasteTypes, createWasteTypesBulk, importTrazabilidad } = useData()
-  const navigate = useNavigate()
+  const router = useRouter()
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string | null>(null)
@@ -140,7 +140,7 @@ function Trazabilidad({ project }: { project: Project }) {
         `${created + updated} ${created + updated === 1 ? 'mes importado' : 'meses importados'}` +
           (updated > 0 ? ` (${updated} reemplazado${updated === 1 ? '' : 's'})` : ''),
       )
-      navigate('/ingreso')
+      router.push('/ingreso')
     } finally {
       setImporting(false)
     }
@@ -386,7 +386,7 @@ interface ParsedRow {
 
 function CsvAvance({ project }: { project: Project }) {
   const { records, wasteTypes, createRecordsBulk } = useData()
-  const navigate = useNavigate()
+  const router = useRouter()
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const [text, setText] = useState('')
@@ -414,7 +414,7 @@ function CsvAvance({ project }: { project: Project }) {
       })),
     )
     toast(`${ok.length} ${ok.length === 1 ? 'mes importado' : 'meses importados'}`)
-    navigate('/ingreso')
+    router.push('/ingreso')
   }
 
   const okCount = rows?.filter((r) => !r.error).length ?? 0
