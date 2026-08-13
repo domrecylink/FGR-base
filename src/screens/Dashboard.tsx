@@ -7,12 +7,23 @@ import type { FgrMode } from '../types'
 import { formatFgr, formatNumber, formatPct } from '../utils/format'
 import Card from '../components/ds/Card'
 import Button from '../components/ds/Button'
+import InfoTip, { type InfoTipContent } from '../components/ds/InfoTip'
 import ProjectSelect from '../components/ProjectSelect'
 import NoProjects from '../components/NoProjects'
 import FgrChart, { ChartLegend } from '../components/FgrChart'
 import RateChart from '../components/RateChart'
 import WasteFilter, { type WasteFilterOption } from '../components/WasteFilter'
 import { IconAlert } from '../components/icons'
+import {
+  evolucionHelp,
+  fgrGlobalHelp,
+  fgrNoValorizadoHelp,
+  fgrValorizadoHelp,
+  modeWord,
+  pctValorizacionHelp,
+  valorizacionPorM2Help,
+  wasteTotalHelp,
+} from './dashboardHelp'
 
 export default function Dashboard() {
   const { projects, records, events, wasteTypes, selectedProjectId } = useData()
@@ -178,21 +189,50 @@ export default function Dashboard() {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
-            <Kpi label={mode === 'monthly' ? 'FGR global del mes' : 'FGR global acumulado'} value={formatFgr(last?.global ?? null)} color={filtered ? 'var(--rl-fg)' : fgrColorVar(last?.global ?? null, target)} sub={filtered ? 'parcial · no comparable con la meta' : `meta ${formatFgr(target)} m³/m²`} />
-            <Kpi label="FGR valorizado" value={formatFgr(last?.valorizado ?? null)} color="var(--rl-success-700)" sub="residuo que se recicla" />
-            <Kpi label="FGR no valorizado" value={formatFgr(last?.noValorizado ?? null)} color="var(--rl-gray-700)" sub="residuo a relleno" />
-            <Kpi label="Residuo total retirado" value={`${formatNumber(last?.wasteTotal ?? 0, 1)} m³`} color="var(--rl-fg)" sub={mode === 'monthly' ? 'en el último mes' : 'acumulado a la fecha'} />
+            <Kpi
+              label={mode === 'monthly' ? 'FGR global del mes' : 'FGR global acumulado'}
+              value={formatFgr(last?.global ?? null)}
+              color={filtered ? 'var(--rl-fg)' : fgrColorVar(last?.global ?? null, target)}
+              sub={filtered ? 'parcial · no comparable con la meta' : `meta ${formatFgr(target)} m³/m²`}
+              info={fgrGlobalHelp(mode)}
+            />
+            <Kpi
+              label={`FGR valorizado ${modeWord(mode)}`}
+              value={formatFgr(last?.valorizado ?? null)}
+              color="var(--rl-success-700)"
+              sub="m³ recuperados por m² construido"
+              info={fgrValorizadoHelp(mode)}
+            />
+            <Kpi
+              label={`FGR no valorizado ${modeWord(mode)}`}
+              value={formatFgr(last?.noValorizado ?? null)}
+              color="var(--rl-gray-700)"
+              sub="m³ a disposición final por m² construido"
+              info={fgrNoValorizadoHelp(mode)}
+            />
+            <Kpi
+              label="Residuo total retirado"
+              value={`${formatNumber(last?.wasteTotal ?? 0, 1)} m³`}
+              color="var(--rl-fg)"
+              sub={mode === 'monthly' ? 'en el último mes con registro' : 'acumulado a la fecha'}
+              info={wasteTotalHelp(mode)}
+            />
           </div>
 
           <Card>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <h2 style={{ font: '700 19px/1.25 var(--rl-font-body)', color: 'var(--rl-fg)' }}>
-                    Evolución del FGR ({mode === 'monthly' ? 'mensual' : 'acumulado'})
-                  </h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <h2 style={{ font: '700 19px/1.25 var(--rl-font-body)', color: 'var(--rl-fg)' }}>
+                      Evolución del FGR ({mode === 'monthly' ? 'mensual' : 'acumulado'})
+                    </h2>
+                    <InfoTip {...evolucionHelp(mode)} />
+                  </div>
                   <span style={{ font: '400 13.5px/1.4 var(--rl-font-body)', color: 'var(--rl-fg-subtle)' }}>
-                    m³ de residuo por m² construido, mes a mes.
+                    {mode === 'monthly'
+                      ? 'Cada punto es el mes aislado: m³ retirados ese mes ÷ m² construidos ese mes.'
+                      : 'Cada punto acumula desde el primer mes: todos los m³ ÷ todos los m² construidos a esa fecha.'}
                     {filtered &&
                       ` Sólo ${selectedIds.size} de ${wasteOptions.length} tipos de residuo.`}
                   </span>
@@ -208,9 +248,10 @@ export default function Dashboard() {
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <ChartHead
-                  title="% de valorización"
+                  title={`% de valorización ${modeWord(mode)}`}
                   value={formatPct(last?.pctValorizado ?? null)}
-                  sub={`m³ valorizados sobre el total ${mode === 'monthly' ? 'del mes' : 'acumulado'}. No depende de los m² construidos.`}
+                  sub={`m³ valorizados sobre el total ${modeWord(mode)}. No depende de los m² construidos.`}
+                  info={pctValorizacionHelp(mode)}
                 />
                 <RateChart
                   series={series}
@@ -227,9 +268,14 @@ export default function Dashboard() {
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <ChartHead
-                  title="Valorización por m²"
+                  title={`Valorización por m² (${mode === 'monthly' ? 'mensual' : 'acumulada'})`}
                   value={`${formatFgr(last?.valorizado ?? null)} m³/m²`}
-                  sub="m³ valorizados por m² construido. Los meses con avance pendiente quedan como hueco."
+                  sub={
+                    mode === 'monthly'
+                      ? 'm³ valorizados del mes ÷ m² construidos ese mes. Los meses con avance pendiente quedan como hueco.'
+                      : 'm³ valorizados acumulados ÷ m² acumulados. Los meses con avance pendiente quedan como hueco.'
+                  }
+                  info={valorizacionPorM2Help(mode)}
                 />
                 <RateChart
                   series={series}
@@ -248,11 +294,14 @@ export default function Dashboard() {
   )
 }
 
-function ChartHead({ title, value, sub }: { title: string; value: string; sub: string }) {
+function ChartHead({ title, value, sub, info }: { title: string; value: string; sub: string; info?: InfoTipContent }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-        <h3 style={{ font: '700 17px/1.25 var(--rl-font-body)', color: 'var(--rl-fg)' }}>{title}</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h3 style={{ font: '700 17px/1.25 var(--rl-font-body)', color: 'var(--rl-fg)' }}>{title}</h3>
+          {info && <InfoTip {...info} />}
+        </div>
         <span style={{ font: '400 13px/1.45 var(--rl-font-body)', color: 'var(--rl-fg-subtle)' }}>{sub}</span>
       </div>
       <strong style={{ font: '700 26px/1.1 var(--rl-font-body)', color: 'var(--rl-fg)', whiteSpace: 'nowrap' }}>
@@ -262,11 +311,14 @@ function ChartHead({ title, value, sub }: { title: string; value: string; sub: s
   )
 }
 
-function Kpi({ label, value, color, sub }: { label: string; value: string; color: string; sub: string }) {
+function Kpi({ label, value, color, sub, info }: { label: string; value: string; color: string; sub: string; info?: InfoTipContent }) {
   return (
     <Card>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <span style={{ font: '400 14px/1.2 var(--rl-font-body)', color: '#727272' }}>{label}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 7, font: '400 14px/1.2 var(--rl-font-body)', color: '#727272' }}>
+          {label}
+          {info && <InfoTip {...info} />}
+        </span>
         <strong style={{ font: '700 32px/1.1 var(--rl-font-body)', color }}>{value}</strong>
         <span style={{ font: '400 13px/1.3 var(--rl-font-body)', color: 'var(--rl-fg-subtle)' }}>{sub}</span>
       </div>
