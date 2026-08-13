@@ -32,3 +32,6 @@ dist-ssr
 .next
 next-env.d.ts
 .vercel
+
+# typescript
+tsconfig.tsbuildinfo

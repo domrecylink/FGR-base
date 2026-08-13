@@ -4,7 +4,7 @@
  * Deploy: Implementar > Nueva implementación > Aplicación web
  *   - Ejecutar como: Yo
  *   - Quién tiene acceso: Cualquier persona
- * Copia la URL /exec a VITE_GAS_URL del frontend.
+ * Copia la URL /exec a NEXT_PUBLIC_GAS_URL del frontend.
  *
  * Contrato:
  *   GET   -> { projects:[...], records:[...], events:[...] }
