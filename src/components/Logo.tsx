@@ -3,7 +3,7 @@ import { useState } from 'react'
 /** Logo Recylink. Coloca el PNG en public/logo-recylink.png; si no existe, cae a wordmark de texto. */
 export default function Logo({ height = 28 }: { height?: number }) {
   const [failed, setFailed] = useState(false)
-  const src = `${import.meta.env.BASE_URL}logo-recylink.png`
+  const src = '/logo-recylink.png'
 
   if (failed) {
     return (
